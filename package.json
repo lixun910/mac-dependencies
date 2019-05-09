@@ -1,0 +1,32 @@
+{
+  "name": "mac-dependencies",
+  "version": "1.0.0",
+  "description": "A library to find dependencies of a given executable or dylib on Mac OSX",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lixun910/mac-dependencies.git"
+  },
+  "keywords": [
+    "mac-dependencies"
+  ],
+  "author": "Xun Li lixun910@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lixun910/mac-dependencies/issues"
+  },
+  "homepage": "https://github.com/lixun910/mac-dependencies#readme",
+  "dependencies": {
+    "arraybuffer-to-string": "^1.0.2",
+    "child_process": "^1.0.2",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
+    "treeify": "^1.1.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4"
+  }
+}
