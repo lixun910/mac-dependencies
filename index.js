@@ -10,6 +10,9 @@ const treeify = require('treeify');
 // search directories for finding dylibs
 var g_search_dirs = ['/usr/lib', '/usr/local/lib'];
 
+// default system directories
+var g_system_dirs = ['/usr/lib/system', '/System/Library']
+
 // global functions
 function g_is_file_executable(file_path) {
     // when Mach header: filetype == 2
@@ -53,10 +56,6 @@ function g_get_r_path(file_path) {
 }
 
 module.exports = {
-    // search dirs for finding actual file from local hard-disk
-    // users can configure it
-    search_dirs : g_search_dirs,
-
     /**
      * get dependencies of an input file
      * 
@@ -70,6 +69,7 @@ module.exports = {
     get_deps : function(file_path, options) {
         options = options || {};
         if (options.search_dirs)  g_search_dirs = options.search_dirs;
+        if (options.system_dirs)  g_system_dirs = options.system_dirs;
 
         var results = {};
         var exe_type = typeof file_path;
@@ -102,8 +102,9 @@ module.exports = {
      * print the dependencies of an input file.
      *
      * Options: {Object} 
-     *  - `array` search directories []
-     *  - `long` verbose formatting [false]
+     *  - `array` search directories [search_dirs]
+     *  - `array` system directories [system_dirs]
+     *  - `bool`  is print as one line [is_oneline]
      *
      * @param {String} file_path
      * @param {Object} [options]
@@ -112,10 +113,23 @@ module.exports = {
      *  
      * @api public
      */
-    print: function(file_path, options) {
+    print_deps: function(file_path, options) {
         var deps = this.get_deps(file_path, options);
-        var output = treeify.asTree(deps);
-        console.log(output);
+        
+        options = options || {};
+        var is_oneline = false;
+        if (options.is_oneline) is_oneline = options.is_oneline;
+
+        var output = "";
+        if (is_oneline) { 
+            treeify.asLines(deps, true, function(line) {
+                output += line;
+                console.log(line);
+            });
+        } else { 
+            output = treeify.asTree(deps);
+            console.log(output);
+        }
         return output;
     },
 
@@ -194,10 +208,17 @@ class TargetFile {
         return false;
     }
 
-    // get file name from file path:
-    // e.g. /usr/lib/test.dylib will return test.dylib
-    _get_fname_from_path(file_path) {
-        return file_path.substring(file_path.lastIndexOf('/')+1, file_path.length);
+    // check if two file paths are same
+    _is_same_file(file_path_1, file_path_2) {
+        if (path.basename(file_path_1) == path.basename(file_path_2)) { 
+            return true;
+        }
+
+        var real_1 = fs.realpathSync(file_path_1);
+        var real_2 = fs.realpathSync(file_path_2);
+        if (real_1 == real_2) return true;
+        
+        return false;
     }
 
     // try to find a file from search_dirs e.g. /usr/lib and /usr/local/lib
@@ -215,8 +236,11 @@ class TargetFile {
 
     // check if dylib is system dylib, if yes, there is no need to find its dependencies 
     _is_system_lib (file_path) {
-        if (file_path.indexOf('/usr/lib/system') == 0) return true;
-        if (file_path.indexOf('/System/Library') == 0) return true;
+        for (var idx = 0; idx < g_system_dirs.length; ++idx) {
+            if (file_path.indexOf(g_system_dirs[idx]) == 0) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -237,8 +261,9 @@ class TargetFile {
             el = el.replace('\t', '');
             el = el.substring(0, el.indexOf(' (compatibility version'));
     
-            if (this._get_fname_from_path(el) == this._get_fname_from_path(exe_path)) {
+            if (this._is_same_file(el, exe_path)) {
                 // for dylib, the second line is dylib itself
+                // e.g. /usr/lib/libcurl.dylib --> symbolic link /usr/lib/libcurl.4.dylib
                 continue;
             }
             // get an absolute dylib path
@@ -256,16 +281,16 @@ class TargetFile {
             if (r_path.length > 0) opts["r_path"] = r_path;
 
             var child = new TargetFile(abs_el, opts);
-            if (this._dep_exist(child) == false) {
+            if (this._dep_exist(child) == false && child.is_system == false) {
                 this.dependencies.push(child);
             }
         }
     }
 
     _dep_exist(dep_obj) {
-        var target_fname = this._get_fname_from_path(dep_obj.file_path);
+        var target_fname = path.basename(dep_obj.file_path);
         for (var idx = 0; idx < this.dependencies.length; ++idx) {
-            var orig_fname = this._get_fname_from_path(this.dependencies[idx].file_path);
+            var orig_fname = path.basename(this.dependencies[idx].file_path);
             if (target_fname == orig_fname) {
                 return true;
             }
@@ -298,4 +323,3 @@ class TargetFile {
         return dylib_path; 
     }
 }
-
