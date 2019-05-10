@@ -32,28 +32,32 @@ Output:
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
+#### check missing dependencies
 
-If the real path of a dependency can not be found, the output will use a "question mark" icon ❓ to highlight it. 
+If any dependencies are missing or can not be found, they will be highlighed in the output with a "question mark" icon ❓.
 
-For example:
+Example:
 ```javascript
 macdep.print_deps('/Users/xun/test.dylib');
 ```
 
-Since the @rpath is not defined in `test.dylib`, the output of `print_deps()` will report that dependency `libpng16.16.dylib` cannot be found:
+Output:
 ```
 └─ ✔ test.dylib /Users/xun/test.dylib
    ├─ ❓ libpng16.16.dylib @rpath/libpng16.16.dylib
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-One can specify a list of search dirs as an option to tell the program to search the missing dependency:
+#### Option: `search_dirs`
+One can specify a list of search dirs as an option to tell the program to search any missing dependencies:
+
+Example:
 ```javascript
-macdep.print_deps('/Users/xun/test.dylib', {"search_dirs" : ["/usr/lib", "/usr/local/lib"]});
-
-
+var opts = {"search_dirs" : ["/usr/lib", "/usr/local/lib"]};
+macdep.print_deps('/Users/xun/test.dylib', opts);
 ```
-The output:
+
+Output:
 ```
 └─ ✔ test.dylib /Users/xun/test.dylib
    ├─ ✔ libpng16.16.dylib /usr/local/lib/libpng16.16.dylib
