@@ -12,14 +12,14 @@ Users can use it to print the dependencies, check which dependencies were missin
 print_deps(file_path : String, {options : Dict}) : String
 ```
 
-Example:
+> Example:
 ```javascript
 const macdep = require('mac-dependencies');
 
 macdep.print_deps('/usr/lib/libcurl.dylib');
 ```
 
-Output:
+> Output:
 ```
 └─ ✔ libcurl.dylib /usr/lib/libcurl.dylib
    ├─ ✔ libcrypto.42.dylib /usr/lib/libcrypto.42.dylib
@@ -35,45 +35,45 @@ Output:
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-> Check missing dependencies
+#### 1.1 Check missing dependencies
 
 Any missing dependencies will be highlighed in the output with a "question mark" icon ❓.
 
-Example:
+> Example:
 ```javascript
 macdep.print_deps('/Users/xun/test.dylib');
 ```
 
-Output:
+> Output:
 ```
 └─ ✔ test.dylib /Users/xun/test.dylib
    ├─ ❓ libpng16.16.dylib @rpath/libpng16.16.dylib
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-> Option: `search_dirs`
+#### 1.2 Option: `search_dirs`
 For missing dependencies, one can specify a list of search dirs as an option to tell the program to search any missing dependencies.
 
-Example:
+> Example:
 ```javascript
 var opts = {"search_dirs" : ["/usr/lib", "/usr/local/lib"]};
 macdep.print_deps('/Users/xun/test.dylib', opts);
 ```
 
-Output:
+> Output:
 ```
 └─ ✔ test.dylib /Users/xun/test.dylib
    ├─ ✔ libpng16.16.dylib /usr/local/lib/libpng16.16.dylib
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-> Option: `system_dirs`
+#### 1.3 Option: `system_dirs`
 
 Default value: ['/usr/lib/system', '/Library/System']
 
 One can specify a list of system dirs as an option to tell the program to ignore when searching dependencies.
 
-Example:
+> Example:
 ```javascript
 var opts = {
     "system_dirs" : ["/usr/lib"], 
@@ -82,7 +82,7 @@ var opts = {
 macdep.print_deps('/Users/xun/test.dylib', opts);
 ```
 
-Output:
+>Output:
 ```
 └─ ✔ test.dylib /Users/xun/test.dylib
    └─ ✔ libpng16.16.dylib /usr/local/lib/libpng16.16.dylib
