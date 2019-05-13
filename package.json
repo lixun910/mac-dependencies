@@ -1,10 +1,10 @@
 {
   "name": "mac-dependencies",
-  "version": "1.0.0",
-  "description": "A library to find dependencies of a given executable or dylib on Mac OSX",
+  "version": "0.1.0",
+  "description": "A library to check dependencies of a given executable or dylib on Mac OSX",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "./node_modules/mocha/bin/mocha --reporter spec --timeout 10000"
   },
   "repository": {
     "type": "git",

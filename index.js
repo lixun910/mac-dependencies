@@ -8,7 +8,7 @@ const treeify = require('treeify');
 
 //  global variables
 // search directories for finding dylibs
-var g_search_dirs = ['/usr/lib', '/usr/local/lib'];
+var g_search_dirs = ['/usr/lib'];
 
 // default system directories
 var g_system_dirs = ['/usr/lib/system', '/System/Library']
@@ -71,7 +71,7 @@ module.exports = {
         if (options.search_dirs)  g_search_dirs = options.search_dirs;
         if (options.system_dirs)  g_system_dirs = options.system_dirs;
 
-        var results = {};
+        var results = null;
         var exe_type = typeof file_path;
         if (exe_type === 'string' && file_path.length > 0) {
             if (fs.existsSync(file_path)) {
@@ -91,8 +91,13 @@ module.exports = {
                     opts["r_path"] = r_path;
                 }
 
-                var target = new TargetFile(file_path, opts);
-                results = target.print_json();
+                results = new TargetFile(file_path, opts);
+                //results = target.print_json();
+                //for (var idx = 0; idx < target.dependencies.length; ++idx) {
+                //    if (target.dependencies[idx].is_system == false) {
+                //        results.push( target.dependencies[idx].file_path );
+                //    }
+                //}
             } 
         }  
         return results;
@@ -114,20 +119,23 @@ module.exports = {
      * @api public
      */
     print_deps: function(file_path, options) {
+        var output = "";
+
         var deps = this.get_deps(file_path, options);
-        
+        if (deps == null) return output;
+
+        var json = deps.print_json();
+
         options = options || {};
         var is_oneline = false;
         if (options.is_oneline) is_oneline = options.is_oneline;
 
-        var output = "";
         if (is_oneline) { 
-            treeify.asLines(deps, true, function(line) {
+            treeify.asLines(json, true, function(line) {
                 output += line;
-                console.log(line);
             });
         } else { 
-            output = treeify.asTree(deps);
+            output = treeify.asTree(json);
             console.log(output);
         }
         return output;
@@ -200,7 +208,7 @@ class TargetFile {
     _is_file_valid (file_path) {
         if (fs.existsSync(file_path)) return true;
         // try to find it in search_dirs e.g. /usr/lib and /usr/local/lib
-        var guess_path = _guess_file(file_path);
+        var guess_path = this._guess_file(file_path);
         if (fs.existsSync(guess_path))  {
             this.file_path = guess_path;
             return true;
@@ -213,17 +221,17 @@ class TargetFile {
         if (path.basename(file_path_1) == path.basename(file_path_2)) { 
             return true;
         }
-
-        var real_1 = fs.realpathSync(file_path_1);
-        var real_2 = fs.realpathSync(file_path_2);
-        if (real_1 == real_2) return true;
-        
+        if (fs.existsSync(file_path_1) && fs.existsSync(file_path_2)) {
+            var real_1 = fs.realpathSync(file_path_1);
+            var real_2 = fs.realpathSync(file_path_2);
+            if (real_1 == real_2) return true;
+        }
         return false;
     }
 
     // try to find a file from search_dirs e.g. /usr/lib and /usr/local/lib
     _guess_file (file_path) {
-        var file_name = this._get_fname_from_path(file_path); 
+        var file_name = path.basename(file_path); 
         for (var i=0; i < g_search_dirs.length; ++i) {
             var search_dir = g_search_dirs[i];
             var guess_path  = search_dir + '/' + file_name; 
@@ -270,15 +278,17 @@ class TargetFile {
             var abs_el = this._check_dylib_path(el);
            
             var opts = {};
-            opts["executable_path"] = this.executable_path;
+            if (fs.existsSync(abs_el)) {
+                opts["executable_path"] = this.executable_path;
 
-            // get dir of this dylib as loader_path
-            var loader_path = path.dirname(abs_el);
-            opts["loader_path"] = loader_path;
+                // get dir of this dylib as loader_path
+                var loader_path = path.dirname(abs_el);
+                opts["loader_path"] = loader_path;
 
-            // get rpath from this dylib if any
-            var r_path = g_get_r_path(abs_el);
-            if (r_path.length > 0) opts["r_path"] = r_path;
+                // get rpath from this dylib if any
+                var r_path = g_get_r_path(abs_el);
+                if (r_path.length > 0) opts["r_path"] = r_path;
+            }
 
             var child = new TargetFile(abs_el, opts);
             if (this._dep_exist(child) == false && child.is_system == false) {
@@ -311,7 +321,7 @@ class TargetFile {
             dylib_path = dylib_path.replace('@loader_path', this.loader_path);
             if (fs.existsSync(dylib_path)) return dylib_path;
     
-        } else if (dylib_path.indexOf('@rpath') >= 0) {
+        } else if (dylib_path.indexOf('@rpath') >= 0 && this.r_path) {
             dylib_path = dylib_path.replace('@rpath', this.r_path);
             if (fs.existsSync(dylib_path)) return dylib_path;
     

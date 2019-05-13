@@ -2,8 +2,11 @@ var assert = require('assert');
 var macdep = require('../index')
 
 var test_dylib_path = "/usr/lib/libcurl.dylib";
+var test_dylib_path1 = "/Users/xun/Library/Developer/Xcode/DerivedData/GeoDa-dncapxghsajzlcbchzwqcqewkqkn/Build/Products/Debug/GeoDa.app/Contents/MacOS/GeoDa";
 
-//var output = macdep.print_deps('/usr/lib/libcurl.dylib', {'is_oneline' : true});
+//macdep.print_deps(test_dylib_path, {"system_dirs" : ['/usr/lib', '/System/Library']});
+//var out  = macdep.get_deps(test_dylib_path);
+//var output = macdep.print_deps(test_dylib_path, {'is_oneline' : true});
 
 /**
  * test cases for function print_deps() 
@@ -27,35 +30,23 @@ describe('mac-dependencies', function() {
  * test cases for function get_deps() 
  */
 describe('mac-dependencies', function() {
-    describe('->get_deps("/usr/lib/libcurl.dylib")', function(){
+    describe('->get_deps()', function(){
         it('should return an empty dict object.', function(){
-            assert.deepEqual(macdep.get_deps(), {});
+            assert.deepEqual(macdep.get_deps(), null);
         })
     });
 
     describe('->get_deps("/usr/lib/libcurl.dylib")', function(){
         it('should return a dictionary object.', function(){
-            assert.deepEqual(macdep.get_deps(test_dylib_path), 
-            {
-                "✔ libcurl.dylib /usr/lib/libcurl.dylib" : {
-                    "✔ libcrypto.42.dylib /usr/lib/libcrypto.42.dylib" : {
-                        "✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib" : null    
-                    },
-                    "✔ libssl.44.dylib /usr/lib/libssl.44.dylib" : {
-                        "✔ libcrypto.42.dylib /usr/lib/libcrypto.42.dylib" : {
-                            "✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib" : null
-                        },
-                        "✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib" : null
-                    },
-                    "✔ libapple_nghttp2.dylib /usr/lib/libapple_nghttp2.dylib" : {
-                        "✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib" : null
-                    },
-                    "✔ libz.1.dylib /usr/lib/libz.1.dylib" : {
-                        "✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib" : null
-                    },
-                    "✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib" : null
-                }   
-            });
+            var rtn_obj = macdep.get_deps(test_dylib_path);
+            assert.equal(rtn_obj.file_path, '/usr/lib/libcurl.dylib');
+            assert.equal(rtn_obj.file_name, 'libcurl.dylib');
+            assert.equal(rtn_obj.is_system, false);
+            assert.equal(rtn_obj.is_valid, true);
+            assert.deepEqual(rtn_obj.executable_path, undefined);
+            assert.equal(rtn_obj.loader_path, '/usr/lib');
+            assert.deepEqual(rtn_obj.r_path, undefined);
+            assert.equal(rtn_obj.dependencies.length, 5);
         });
     });
 });
