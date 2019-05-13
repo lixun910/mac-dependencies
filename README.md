@@ -6,10 +6,10 @@ Users can use it to print the dependencies, check which dependencies were missin
 
 ## Usage
 
-### print_deps()
+### 1. print_deps()
 
 ```javascript
-print_deps(file_path(String), options(Dict)) : (String)
+print_deps(file_path : String, {options : Dict}) : String
 ```
 
 Example:
@@ -35,7 +35,7 @@ Output:
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-#### check missing dependencies
+#### 1.1 Check missing dependencies
 
 Any missing dependencies will be highlighed in the output with a "question mark" icon ❓.
 
@@ -51,7 +51,7 @@ Output:
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-#### Option: `search_dirs`
+#### 1.2 Option: `search_dirs`
 For missing dependencies, one can specify a list of search dirs as an option to tell the program to search any missing dependencies.
 
 Example:
@@ -67,7 +67,7 @@ Output:
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-#### Option: `system_dirs`
+#### 1.3 Option: `system_dirs`
 
 Default value: ['/usr/lib/system', '/Library/System']
 
@@ -75,7 +75,10 @@ One can specify a list of system dirs as an option to tell the program to ignore
 
 Example:
 ```javascript
-var opts = {"system_dirs" : ["/usr/lib"], "search_dirs" : ["/usr/lib", "/usr/local/lib"]};
+var opts = {
+    "system_dirs" : ["/usr/lib"], 
+    "search_dirs" : ["/usr/lib", "/usr/local/lib"]
+};
 macdep.print_deps('/Users/xun/test.dylib', opts);
 ```
 
@@ -85,23 +88,33 @@ Output:
    └─ ✔ libpng16.16.dylib /usr/local/lib/libpng16.16.dylib
 ```
 
-### get_deps()
+### 2. get_deps()
 
 ```javascript
+get_deps(file_path : String, {options : dict}) : object
 ```
 
 Example:
 ```javascript
 const macdep = require('mac-dependencies');
 
-var deps = macdep.get_deps('/usr/lib/libcurl.dylib');
+var dep = macdep.get_deps('/usr/lib/libcurl.dylib');
 ```
 
-Output is an array of first-order dependencies:
+Returns a javascript object representing the tree structure of dependencies. For example:
+```javascript
+dep {
+   // attributes
+   this.file_path = '/Users/xun/test.dylib', // 
+   this.file_name = 'test.lib', //
+   this.is_system = false, //
+   this.is_valid = true, //
+   this.dependencies = ['/usr/local/lib/libpng16.16.dylib', // a list of dependencies as dep objects
+                        '/usr/lib/libSystem.B.dylib'], 
+   this.executable_path = '/Users/xun',
+   this.loader_path = '/Users/xun',
+   this.r_path = undefined
+}
 ```
-0:"/usr/lib/libcrypto.42.dylib"
-1:"/usr/lib/libssl.44.dylib"
-2:"/usr/lib/libapple_nghttp2.dylib"
-3:"/usr/lib/libz.1.dylib"
-4:"/usr/lib/libSystem.B.dylib"
-```
+
+One can traverse this tree structure starting from the return object by `get_deps()` function, and looping its children in `dependencies[]`.
