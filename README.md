@@ -1,12 +1,15 @@
 # mac-dependencies
 
-Mac-dependencies is a node.js module to walk dependencies of an executable or dylib on Mac.
+Mac-dependencies is a node.js module to "walk" dependencies of an executable or dylib on Mac. It will automatically resolve the `@executable_path`, `@rpath` and `@loader_path` paths to find dependent libraries.
+
+Users can use it to print the dependencies, check which dependencies were missing, and build a DMG by copying dependent libraries of an executable on Mac.
 
 ## Usage
 
 ### print_deps()
 
 ```javascript
+print_deps(file_path(String), options(Dict)) : (String)
 ```
 
 Example:
@@ -34,7 +37,7 @@ Output:
 
 #### check missing dependencies
 
-If any dependencies are missing or can not be found, they will be highlighed in the output with a "question mark" icon ❓.
+Any missing dependencies will be highlighed in the output with a "question mark" icon ❓.
 
 Example:
 ```javascript
@@ -49,7 +52,7 @@ Output:
 ```
 
 #### Option: `search_dirs`
-One can specify a list of search dirs as an option to tell the program to search any missing dependencies:
+For missing dependencies, one can specify a list of search dirs as an option to tell the program to search any missing dependencies.
 
 Example:
 ```javascript
@@ -62,6 +65,24 @@ Output:
 └─ ✔ test.dylib /Users/xun/test.dylib
    ├─ ✔ libpng16.16.dylib /usr/local/lib/libpng16.16.dylib
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
+```
+
+#### Option: `system_dirs`
+
+Default value: ['/usr/lib/system', '/Library/System']
+
+One can specify a list of system dirs as an option to tell the program to ignore when searching dependencies.
+
+Example:
+```javascript
+var opts = {"system_dirs" : ["/usr/lib"], "search_dirs" : ["/usr/lib", "/usr/local/lib"]};
+macdep.print_deps('/Users/xun/test.dylib', opts);
+```
+
+Output:
+```
+└─ ✔ test.dylib /Users/xun/test.dylib
+   └─ ✔ libpng16.16.dylib /usr/local/lib/libpng16.16.dylib
 ```
 
 ### get_deps()
