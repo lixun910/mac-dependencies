@@ -119,6 +119,24 @@ dep {
 
 One can traverse this tree structure starting from the return object by `get_deps()` function, and looping its children in `dependencies[]`.
 
+```javascript
+const macdep = require('mac-dependencies');
+
+var dep = macdep.get_deps('/usr/lib/libcurl.dylib');
+if (dep) {
+   var stack = [dep];
+   console.log("Print depdencies of ", dep.file_path);
+   while (stack.length > 0) {
+      var el = stack.pop();
+      for (var i = 0; i < dep.dependencies.length; i++) {
+         stack.push(dep.dependencies[i]);
+      }
+   }
+}
+
+
+``
+
 ## Contact
 
 Xun Li lixun at gmail.com
