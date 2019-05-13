@@ -35,7 +35,7 @@ Output:
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-#### 1.1 Check missing dependencies
+> Check missing dependencies
 
 Any missing dependencies will be highlighed in the output with a "question mark" icon ❓.
 
@@ -51,7 +51,7 @@ Output:
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-#### 1.2 Option: `search_dirs`
+> Option: `search_dirs`
 For missing dependencies, one can specify a list of search dirs as an option to tell the program to search any missing dependencies.
 
 Example:
@@ -67,7 +67,7 @@ Output:
    └─ ✔ libSystem.B.dylib /usr/lib/libSystem.B.dylib
 ```
 
-#### 1.3 Option: `system_dirs`
+> Option: `system_dirs`
 
 Default value: ['/usr/lib/system', '/Library/System']
 
