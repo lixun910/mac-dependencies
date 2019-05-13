@@ -2,7 +2,7 @@
 
 Mac-dependencies is a node.js module to "walk" dependencies of an executable or dylib on Mac. It will automatically resolve the `@executable_path`, `@rpath` and `@loader_path` paths to find dependent libraries.
 
-Users can use it to print the dependencies, check which dependencies were missing, and build a DMG by copying dependent libraries of an executable on Mac.
+Users can use it to print the dependencies, check which dependencies were missing, and build a DMG by copying dependent libraries of an executable on Mac (see its usage in [GeoDa](https://github.com/lixun910/GeoDa) build toolchain).
 
 ## Usage
 
@@ -118,3 +118,7 @@ dep {
 ```
 
 One can traverse this tree structure starting from the return object by `get_deps()` function, and looping its children in `dependencies[]`.
+
+## Contact
+
+Xun Li lixun at gmail.com
