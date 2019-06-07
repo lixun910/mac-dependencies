@@ -1,8 +1,11 @@
 var assert = require('assert');
 var macdep = require('../index')
 
-var test_dylib_path = "/usr/lib/libcurl.dylib";
+var test_dylib_path2 = "/usr/lib/libcurl.dylib";
 var test_dylib_path1 = "/Users/xun/Library/Developer/Xcode/DerivedData/GeoDa-dncapxghsajzlcbchzwqcqewkqkn/Build/Products/Debug/GeoDa.app/Contents/MacOS/GeoDa";
+var test_dylib_path = "/Users/xun/Github/OSMTools/cmake-build-debug/OSMToolsProject";
+
+var out  = macdep.get_deps(test_dylib_path, {'system_dirs':['/usr/lib', '/System/Library']});
 
 //macdep.print_deps(test_dylib_path, {"system_dirs" : ['/usr/lib', '/System/Library']});
 //var out  = macdep.get_deps(test_dylib_path);
